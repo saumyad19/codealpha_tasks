@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LinguaX — Neural Translation Interface</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Syne:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Animated Background -->
+  <div class="bg-grid"></div>
+  <div class="bg-orbs">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- Floating particles -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="logo">
+      <span class="logo-icon">⬡</span>
+      <span class="logo-text">LINGUA<span class="logo-accent">X</span></span>
+    </div>
+    <div class="header-tag">Neural Language Matrix v2.0</div>
+    <div class="header-status">
+      <span class="status-dot"></span>
+      <span class="status-text">API ONLINE</span>
+    </div>
+  </header>
+
+  <!-- Main App -->
+  <main class="app-container">
+
+    <!-- Controls Row -->
+    <div class="controls-row">
+
+      <!-- Source Language -->
+      <div class="lang-selector source-selector">
+        <label class="selector-label">SOURCE</label>
+        <div class="select-wrapper">
+          <select id="sourceLang" class="lang-select">
+            <option value="auto">⚡ Auto-Detect</option>
+            <option value="en">English</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="ru">Russian</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+            <option value="zh">Chinese</option>
+            <option value="ar">Arabic</option>
+            <option value="hi">Hindi</option>
+            <option value="nl">Dutch</option>
+            <option value="pl">Polish</option>
+            <option value="tr">Turkish</option>
+            <option value="sv">Swedish</option>
+            <option value="uk">Ukrainian</option>
+            <option value="vi">Vietnamese</option>
+            <option value="id">Indonesian</option>
+          </select>
+          <div class="select-arrow">▾</div>
+        </div>
+        <div class="detected-lang" id="detectedLang"></div>
+      </div>
+
+      <!-- Swap Button -->
+      <button class="swap-btn" id="swapBtn" title="Swap Languages">
+        <span class="swap-icon">⇄</span>
+        <div class="swap-ripple"></div>
+      </button>
+
+      <!-- Target Language -->
+      <div class="lang-selector target-selector">
+        <label class="selector-label">TARGET</label>
+        <div class="select-wrapper">
+          <select id="targetLang" class="lang-select">
+            <option value="es">Spanish</option>
+            <option value="en">English</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="it">Italian</option>
+            <option value="pt">Portuguese</option>
+            <option value="ru">Russian</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+            <option value="zh">Chinese</option>
+            <option value="ar">Arabic</option>
+            <option value="hi">Hindi</option>
+            <option value="nl">Dutch</option>
+            <option value="pl">Polish</option>
+            <option value="tr">Turkish</option>
+            <option value="sv">Swedish</option>
+            <option value="uk">Ukrainian</option>
+            <option value="vi">Vietnamese</option>
+            <option value="id">Indonesian</option>
+          </select>
+          <div class="select-arrow">▾</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Translation Panels -->
+    <div class="panels">
+
+      <!-- Input Panel -->
+      <div class="panel panel-input">
+        <div class="panel-header">
+          <span class="panel-label">INPUT STREAM</span>
+          <span class="char-counter" id="charCounter">0 / 5000</span>
+        </div>
+        <textarea
+          id="inputText"
+          class="text-area"
+          placeholder="Begin transmission... enter text to translate"
+          maxlength="5000"
+          spellcheck="false"
+        ></textarea>
+        <div class="panel-footer">
+          <button class="action-btn clear-btn" id="clearBtn" title="Clear">
+            <span>✕ CLEAR</span>
+          </button>
+          <button class="action-btn tts-btn" id="ttsInputBtn" title="Speak Input">
+            <span class="tts-icon">◉</span> SPEAK
+          </button>
+        </div>
+      </div>
+
+      <!-- Translate Button Column -->
+      <div class="translate-col">
+        <button class="translate-btn" id="translateBtn">
+          <div class="translate-btn-inner">
+            <div class="btn-bg-pulse"></div>
+            <span class="btn-icon">⚡</span>
+            <span class="btn-text">TRANSLATE</span>
+            <div class="btn-loader" id="btnLoader">
+              <div class="loader-ring"></div>
+            </div>
+          </div>
+        </button>
+        <div class="neural-lines">
+          <div class="nl nl-1"></div>
+          <div class="nl nl-2"></div>
+          <div class="nl nl-3"></div>
+        </div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="panel panel-output">
+        <div class="panel-header">
+          <span class="panel-label">OUTPUT STREAM</span>
+          <div class="output-actions">
+            <button class="action-btn copy-btn" id="copyBtn" title="Copy Translation">
+              <span id="copyIcon">⎘ COPY</span>
+            </button>
+            <button class="action-btn tts-btn" id="ttsOutputBtn" title="Speak Translation">
+              <span class="tts-icon">◉</span> SPEAK
+            </button>
+          </div>
+        </div>
+        <div class="text-area output-area" id="outputText">
+          <span class="placeholder-text">Translation will materialize here...</span>
+        </div>
+        <div class="panel-footer output-footer">
+          <div class="confidence-bar" id="confidenceBar" style="display:none">
+            <span class="conf-label">CONFIDENCE</span>
+            <div class="bar-track">
+              <div class="bar-fill" id="barFill"></div>
+            </div>
+            <span class="conf-value" id="confValue">—</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-toast" id="errorToast">
+      <span class="error-icon">⚠</span>
+      <span id="errorMsg">Error message here</span>
+    </div>
+
+    <!-- History Section -->
+    <div class="history-section">
+      <div class="history-header">
+        <span class="history-title">⬡ TRANSLATION HISTORY</span>
+        <button class="clear-history-btn" id="clearHistoryBtn">CLEAR ALL</button>
+      </div>
+      <div class="history-list" id="historyList">
+        <div class="history-empty">
+          <span>No translations recorded yet. Begin your session.</span>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>LINGUAX © 2025 — Powered by Neural Translation Matrix</span>
+    <span class="footer-sep">◈</span>
+    <span>LibreTranslate API Engine</span>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
