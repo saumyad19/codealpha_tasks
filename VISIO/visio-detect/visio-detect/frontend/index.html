@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>VISIO Detect — AI Vision</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ── Ambient background ── -->
+  <div class="bg-mesh" aria-hidden="true"></div>
+
+  <!-- ── Header ── -->
+  <header class="topbar">
+    <div class="topbar-brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" stroke-width="2"/>
+          <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+        </svg>
+      </div>
+      <span class="brand-text">VISIO<em>detect</em></span>
+    </div>
+    <div class="topbar-stats">
+      <div class="stat-chip" id="fpsChip">
+        <span class="stat-label">FPS</span>
+        <span class="stat-value" id="fpsVal">—</span>
+      </div>
+      <div class="stat-chip" id="latencyChip">
+        <span class="stat-label">LATENCY</span>
+        <span class="stat-value" id="latencyVal">—</span>
+      </div>
+      <div class="status-dot-wrap">
+        <div class="status-dot" id="statusDot"></div>
+        <span class="status-label" id="statusLabel">OFFLINE</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Main ── -->
+  <main class="shell">
+
+    <!-- ── Video + overlay column ── -->
+    <div class="viewer-col">
+      <div class="viewer-frame" id="viewerFrame">
+
+        <!-- Permission / idle gate -->
+        <div class="gate" id="gate">
+          <div class="gate-inner">
+            <div class="gate-icon" aria-hidden="true">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 3"/>
+                <path d="M15 8a3 3 0 0 1 0 6M9 8a3 3 0 0 0 0 6M12 14v4M8 18h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <p class="gate-headline">Camera access needed</p>
+            <p class="gate-body">VISIO uses your browser camera — nothing is stored or uploaded.</p>
+            <button class="btn-primary" id="startBtn">Enable camera</button>
+            <p class="gate-error hidden" id="gateError"></p>
+          </div>
+        </div>
+
+        <!-- Live layers (hidden until camera is on) -->
+        <video id="videoEl" autoplay muted playsinline class="hidden" aria-label="Webcam feed"></video>
+        <canvas id="overlayCanvas" class="hidden" aria-hidden="true"></canvas>
+
+        <!-- Scanning chrome (decorative brackets) -->
+        <div class="viewer-chrome" aria-hidden="true">
+          <div class="vc-corner vc-tl"></div>
+          <div class="vc-corner vc-tr"></div>
+          <div class="vc-corner vc-bl"></div>
+          <div class="vc-corner vc-br"></div>
+        </div>
+
+        <!-- Sending flash indicator -->
+        <div class="send-flash" id="sendFlash" aria-hidden="true"></div>
+      </div>
+
+      <!-- Controls bar -->
+      <div class="controls-bar" id="controlsBar">
+        <button class="btn-danger hidden" id="stopBtn">Stop camera</button>
+        <div class="conf-wrap">
+          <label for="confSlider" class="ctrl-label">Confidence</label>
+          <input type="range" id="confSlider" min="10" max="95" value="40" step="5" />
+          <span class="conf-val" id="confVal">40%</span>
+        </div>
+        <div class="interval-wrap">
+          <label for="intervalSlider" class="ctrl-label">Interval</label>
+          <input type="range" id="intervalSlider" min="200" max="2000" value="600" step="100" />
+          <span class="conf-val" id="intervalVal">600 ms</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+
+      <!-- Object count -->
+      <div class="panel count-panel">
+        <p class="panel-eyebrow">In frame</p>
+        <div class="count-row">
+          <span class="count-big" id="countBig">0</span>
+          <span class="count-unit">objects</span>
+        </div>
+      </div>
+
+      <!-- API endpoint config -->
+      <div class="panel endpoint-panel">
+        <p class="panel-eyebrow">Backend URL</p>
+        <div class="endpoint-row">
+          <input
+            type="url"
+            id="apiUrl"
+            class="endpoint-input"
+            placeholder="http://localhost:8000"
+            value="http://localhost:8000"
+          />
+          <button class="btn-test" id="testBtn" title="Test connection">Ping</button>
+        </div>
+        <p class="endpoint-hint" id="endpointHint">Enter your Render URL after deployment</p>
+      </div>
+
+      <!-- Detection list -->
+      <div class="panel detections-panel">
+        <div class="panel-header-row">
+          <p class="panel-eyebrow">Detections</p>
+          <span class="badge" id="liveBadge">IDLE</span>
+        </div>
+        <div class="det-list" id="detList">
+          <p class="det-empty">Start the camera to see detections.</p>
+        </div>
+      </div>
+
+      <!-- Model info -->
+      <div class="panel info-panel">
+        <p class="panel-eyebrow">Model</p>
+        <div class="info-grid">
+          <span class="info-key">Variant</span><span class="info-val">YOLOv8n</span>
+          <span class="info-key">Classes</span><span class="info-val">80 (COCO)</span>
+          <span class="info-key">Transport</span><span class="info-val">base64 JPEG</span>
+          <span class="info-key">Stream</span><span class="info-val">Browser camera</span>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- ── Toast notification ── -->
+  <div class="toast hidden" id="toast" role="alert" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>

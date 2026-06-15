@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ShopSphere — AI FAQ Assistant</title>
+  <meta name="description" content="Intelligent FAQ chatbot for ShopSphere e-commerce powered by NLP cosine similarity matching." />
+
+  <!-- Preconnect for fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>" />
+</head>
+
+<body>
+
+<!-- Particle canvas background -->
+<canvas id="particleCanvas" aria-hidden="true"></canvas>
+
+<div class="app-shell">
+
+  <!-- ── TOP NAVIGATION ─────────────────────────────────── -->
+  <nav class="top-nav" role="banner">
+    <div class="nav-logo">
+      <div class="logo-icon" aria-hidden="true">🛍️</div>
+      <span>ShopSphere</span>
+      <span class="nav-subtitle">/ FAQ Assistant</span>
+    </div>
+    <div class="nav-badge">
+      <div class="status-dot" aria-hidden="true"></div>
+      <span>AI Online · NLP Powered</span>
+    </div>
+  </nav>
+
+  <!-- ── LEFT SIDEBAR ───────────────────────────────────── -->
+  <aside class="sidebar" role="complementary" aria-label="FAQ browser and NLP inspector">
+
+    <!-- Category Filter -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Browse by Category</div>
+      <div class="faq-filters" role="group" aria-label="FAQ category filter">
+        <button class="faq-filter-btn active" data-category="all">All</button>
+        <button class="faq-filter-btn" data-category="Orders">Orders</button>
+        <button class="faq-filter-btn" data-category="Shipping">Shipping</button>
+        <button class="faq-filter-btn" data-category="Returns">Returns</button>
+        <button class="faq-filter-btn" data-category="Payments">Payments</button>
+        <button class="faq-filter-btn" data-category="Account">Account</button>
+        <button class="faq-filter-btn" data-category="Discounts">Discounts</button>
+        <button class="faq-filter-btn" data-category="Products">Products</button>
+        <button class="faq-filter-btn" data-category="Support">Support</button>
+      </div>
+    </div>
+
+    <!-- FAQ Quick List -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Quick Questions</div>
+      <ul class="faq-list-sidebar" id="faqSidebarList" aria-label="FAQ questions list">
+        <li class="faq-item" data-category="Orders"  onclick="handleQuery('How do I place an order?')">📦 How do I place an order?</li>
+        <li class="faq-item" data-category="Orders"  onclick="handleQuery('Can I cancel my order?')">✏️ Can I cancel my order?</li>
+        <li class="faq-item" data-category="Orders"  onclick="handleQuery('How do I track my order?')">📍 How do I track my order?</li>
+        <li class="faq-item" data-category="Shipping" onclick="handleQuery('What are the shipping options?')">🚚 What are the shipping options?</li>
+        <li class="faq-item" data-category="Shipping" onclick="handleQuery('Do you offer free shipping?')">🎁 Do you offer free shipping?</li>
+        <li class="faq-item" data-category="Shipping" onclick="handleQuery('Do you ship internationally?')">🌍 Do you ship internationally?</li>
+        <li class="faq-item" data-category="Returns"  onclick="handleQuery('What is the return policy?')">↩️ What is the return policy?</li>
+        <li class="faq-item" data-category="Returns"  onclick="handleQuery('How do I return a damaged item?')">🔧 How do I return damaged item?</li>
+        <li class="faq-item" data-category="Returns"  onclick="handleQuery('When will I get my refund?')">💳 When will I get my refund?</li>
+        <li class="faq-item" data-category="Payments" onclick="handleQuery('What payment methods do you accept?')">💳 What payment methods accepted?</li>
+        <li class="faq-item" data-category="Payments" onclick="handleQuery('Is my payment information secure?')">🔒 Is my payment secure?</li>
+        <li class="faq-item" data-category="Payments" onclick="handleQuery('Can I use multiple payment methods?')">💰 Split payment options?</li>
+        <li class="faq-item" data-category="Account"  onclick="handleQuery('How do I create an account?')">👤 How do I create an account?</li>
+        <li class="faq-item" data-category="Account"  onclick="handleQuery('I forgot my password')">🔑 I forgot my password</li>
+        <li class="faq-item" data-category="Account"  onclick="handleQuery('How do I update my address?')">📍 How do I update address?</li>
+        <li class="faq-item" data-category="Discounts" onclick="handleQuery('How do I apply a promo code?')">🏷️ How do I apply a promo code?</li>
+        <li class="faq-item" data-category="Discounts" onclick="handleQuery('Do you have a rewards program?')">⭐ Do you have rewards program?</li>
+        <li class="faq-item" data-category="Products"  onclick="handleQuery('How do I know if a product is authentic?')">✔️ Are products authentic?</li>
+        <li class="faq-item" data-category="Products"  onclick="handleQuery('Can I read product reviews?')">📝 Can I read product reviews?</li>
+        <li class="faq-item" data-category="Support"   onclick="handleQuery('How do I contact customer support?')">💬 How to contact support?</li>
+      </ul>
+    </div>
+
+    <!-- NLP Debug Panel -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">NLP Inspector</div>
+      <button class="debug-toggle" id="toggleDebug" aria-expanded="false" aria-controls="debugPanel">
+        View NLP Details ▼
+      </button>
+      <div class="debug-panel" id="debugPanel" role="region" aria-label="NLP processing details">
+        <div class="db-row">
+          <span class="db-label">RAW INPUT</span>
+          <span class="db-value" id="dbRaw">—</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">AFTER PIPELINE (tokens)</span>
+          <span class="db-value" id="dbTokens">—</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">COSINE SIMILARITY SCORE</span>
+          <span class="db-value" id="dbScore">—</span>
+        </div>
+        <div class="db-row">
+          <span class="db-label">MATCHED FAQ</span>
+          <span class="db-value" id="dbMatch">—</span>
+        </div>
+        <div class="score-bar" aria-hidden="true">
+          <div class="score-fill" id="scoreBar"></div>
+        </div>
+      </div>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN CHAT AREA ──────────────────────────────────── -->
+  <main class="chat-area" role="main">
+
+    <!-- Message Feed -->
+    <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-label="Chat conversation">
+      <!-- Welcome block and messages injected by app.js -->
+    </div>
+
+    <!-- Suggestion Chips -->
+    <div class="suggestions" role="group" aria-label="Suggested questions">
+      <button class="chip" type="button">📦 Track my order</button>
+      <button class="chip" type="button">🚚 Shipping options</button>
+      <button class="chip" type="button">↩️ Return policy</button>
+      <button class="chip" type="button">💳 Payment methods</button>
+      <button class="chip" type="button">🔑 Reset password</button>
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-area">
+      <div class="input-wrapper" role="group" aria-label="Message input">
+        <textarea
+          id="userInput"
+          placeholder="Ask anything about orders, shipping, returns…"
+          rows="1"
+          aria-label="Type your message"
+          autocomplete="off"
+          spellcheck="true"
+        ></textarea>
+        <button class="send-btn" id="sendBtn" type="button" aria-label="Send message" disabled>
+          <!-- Send icon -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/>
+          </svg>
+        </button>
+      </div>
+      <p class="input-hint">Press <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</p>
+    </div>
+
+  </main>
+
+</div><!-- /.app-shell -->
+
+<script src="app.js"></script>
+</body>
+</html>

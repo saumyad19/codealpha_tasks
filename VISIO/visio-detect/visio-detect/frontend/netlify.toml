@@ -1,0 +1,14 @@
+# Netlify build config — the frontend is pure static HTML/CSS/JS, no build step needed.
+# Upload the entire `frontend/` folder as the publish directory.
+
+[build]
+  publish = "."          # root of the frontend/ folder
+  command = ""           # no build command needed
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(self)"

@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: visio-detect-api
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: YOLO_MODEL
+        value: yolov8n.pt
+      - key: CONF_THRESHOLD
+        value: "0.40"
+    autoDeploy: true
