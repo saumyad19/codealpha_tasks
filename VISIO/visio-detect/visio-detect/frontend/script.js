@@ -15,9 +15,9 @@
 const CAPTURE_W  = 640;   // Width sent to backend (height auto-scales)
 const JPEG_Q     = 0.75;  // JPEG quality 0–1
 
-let apiBase       = 'http://localhost:8000';
-let captureInterval = 600;  // ms between frames
-let confThreshold   = 0.40;
+let apiBase = 'https://visio-backend-ltmo.onrender.com';
+let captureInterval = 1500;  // ms between frames
+let confThreshold   = 0.25;
 
 let videoStream   = null;
 let detectTimer   = null;
